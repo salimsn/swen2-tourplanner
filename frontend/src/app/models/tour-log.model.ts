@@ -1,8 +1,13 @@
+import { Difficulty } from './difficulty.enum';
+
 export interface TourLog {
-  id: number;
-  tourId: number;
+  id: string;
   dateTime: string;
   comment: string;
-  difficulty: number;
+  difficulty: Difficulty;
+  totalDistanceKm: number;
+  totalTimeMinutes: number;
   rating: number;
 }
+
+export type TourLogPayload = Omit<TourLog, 'id'>;

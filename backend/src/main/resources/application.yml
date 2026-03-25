@@ -1,0 +1,25 @@
+spring:
+  config:
+    import: optional:file:.env[.properties]
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/tourplanner}
+    username: ${DB_USER:tourplanner}
+    password: ${DB_PASSWORD:tourplanner}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+  jackson:
+    time-zone: UTC
+  docker:
+    compose:
+      enabled: true
+
+server:
+  port: ${PORT:8080}
+
+logging:
+  level:
+    dev.salim.backend: DEBUG
