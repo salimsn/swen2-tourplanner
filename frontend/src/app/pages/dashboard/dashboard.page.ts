@@ -19,6 +19,8 @@ export class DashboardPage implements OnInit {
   readonly vm = this.store.vm;
   readonly tourForm = inject(TourFormViewModel);
   readonly tourLogForm = inject(TourLogFormViewModel);
+  imageLoadFailed = false;
+  currentImagePath = '';
 
   readonly tourFormDisabled = computed(() => this.tourForm.form.invalid || this.vm().loading);
   readonly logFormDisabled = computed(() => this.tourLogForm.form.invalid || this.vm().loading);
@@ -38,6 +40,11 @@ export class DashboardPage implements OnInit {
       } else {
         this.tourLogForm.reset();
       }
+    });
+
+    effect(() => {
+      this.currentImagePath = this.vm().selectedTour?.imagePath ?? '';
+      this.imageLoadFailed = false;
     });
   }
 
@@ -103,5 +110,13 @@ export class DashboardPage implements OnInit {
       return;
     }
     this.store.deleteLog(vm.selectedTour.id, logId);
+  }
+
+  onImageError() {
+    this.imageLoadFailed = true;
+  }
+
+  onImageLoad() {
+    this.imageLoadFailed = false;
   }
 }

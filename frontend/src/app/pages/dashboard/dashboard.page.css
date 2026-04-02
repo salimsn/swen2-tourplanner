@@ -97,12 +97,61 @@ dd {
   margin: 0;
 }
 
-.map-placeholder {
+.media-grid {
   margin-top: 1rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.image-column {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.map-placeholder {
   border: 2px dashed rgba(15, 23, 42, 0.2);
   border-radius: 1rem;
   padding: 1rem;
   text-align: center;
+}
+
+.image-preview {
+  border-radius: 1rem;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  min-height: 180px;
+  background-color: rgba(15, 23, 42, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.image-preview__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.image-preview figcaption {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text);
+  text-align: center;
+}
+
+.image-preview figcaption span {
+  font-weight: 400;
+  display: block;
+  color: var(--text-muted);
+}
+
+.image-preview--empty {
+  border-style: dashed;
+  background-color: rgba(15, 23, 42, 0.04);
+  padding: 1rem;
 }
 
 .logs {

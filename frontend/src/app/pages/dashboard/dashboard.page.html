@@ -4,7 +4,6 @@
       <div>
         <p class="eyebrow">Tour Planner</p>
         <h1>Deine geplanten Touren</h1>
-        <small>Work-in-Progress Build · Zwischenstand</small>
       </div>
       <button type="button" class="primary" (click)="showCreateTour()">
         + Neue Tour
@@ -69,9 +68,27 @@
             <section>
               <h3>Beschreibung</h3>
               <p>{{ selectedTour.description }}</p>
-              <div class="map-placeholder">
-                <p>Map Placeholder</p>
-                <small>Leaflet + OpenRouteService wird hier integriert. Aktuelle Route: {{ selectedTour.routeInformation || 'n/a' }}</small>
+              <div class="media-grid">
+                <div class="map-placeholder">
+                  <p>Map Placeholder</p>
+                  <small>Aktuelle Route: {{ selectedTour.routeInformation || 'n/a' }}</small>
+                </div>
+                <div class="image-column">
+                  <figure
+                    class="image-preview"
+                    [class.image-preview--empty]="!currentImagePath || imageLoadFailed">
+                    <img
+                      *ngIf="currentImagePath && !imageLoadFailed"
+                      class="image-preview__img"
+                      [src]="currentImagePath"
+                      alt="Tourbild"
+                      (error)="onImageError()"
+                      (load)="onImageLoad()" />
+                    <figcaption *ngIf="!currentImagePath || imageLoadFailed">
+                      Kein Bild hinterlegt. Bildpfad: <span>{{ currentImagePath || 'n/a' }}</span>
+                    </figcaption>
+                  </figure>
+                </div>
               </div>
             </section>
           </div>
@@ -125,11 +142,11 @@
             </div>
             <label>
               <span>Routeninfo</span>
-              <input type="text" formControlName="routeInformation" placeholder="OpenRouteService Referenz" />
+              <input type="text" formControlName="routeInformation"/>
             </label>
             <label>
-              <span>Bildpfad</span>
-              <input type="text" formControlName="imagePath" placeholder="assets/tours/example.jpg" />
+              <span>Bild/Kartenpfad</span>
+              <input type="text" formControlName="imagePath"/>
             </label>
             <div class="form-actions">
               <button type="button" class="ghost" (click)="cancelTour()">Abbrechen</button>
