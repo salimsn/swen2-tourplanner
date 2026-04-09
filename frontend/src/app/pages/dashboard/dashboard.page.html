@@ -1,0 +1,245 @@
+<div class="dashboard" *ngIf="vm() as vm">
+  <aside class="sidebar">
+    <div class="sidebar__header">
+      <div>
+        <p class="eyebrow">Tour Planner</p>
+        <h1>Deine geplanten Touren</h1>
+      </div>
+      <button type="button" class="primary" (click)="showCreateTour()">
+        + Neue Tour
+      </button>
+    </div>
+
+    <div class="sidebar__list" *ngIf="vm.tours.length; else emptyTours">
+      <button
+        type="button"
+        class="sidebar__item"
+        [class.sidebar__item--active]="tour.id === vm.selectedTour?.id"
+        *ngFor="let tour of vm.tours; trackBy: trackById"
+        (click)="selectTour(tour.id)">
+        <div>
+          <h3>{{ tour.name }}</h3>
+          <p>{{ tour.fromLocation }} → {{ tour.toLocation }}</p>
+        </div>
+        <span>{{ tour.logs.length }} Logs</span>
+      </button>
+    </div>
+
+    <ng-template #emptyTours>
+      <app-ui-card variant="muted">
+        <p>Noch keine Touren angelegt. Erstelle die erste Tour, um zu starten.</p>
+      </app-ui-card>
+    </ng-template>
+  </aside>
+
+  <section class="content">
+    <div class="content__header">
+      <div>
+        <p class="eyebrow">
+          {{ vm.editorMode === 'view' ? 'Tour Details' : (vm.editorMode === 'create' ? 'Neue Tour' : 'Tour bearbeiten') }}
+        </p>
+        <h2>
+          {{ vm.editorMode === 'view' ? vm.selectedTour?.name ?? 'Bitte Tour wählen' : '' }}
+        </h2>
+      </div>
+      <div class="content__actions" *ngIf="vm.editorMode === 'view' && vm.selectedTour">
+        <button type="button" class="ghost" (click)="showEditTour()">Bearbeiten</button>
+        <button type="button" class="ghost danger" (click)="removeTour(vm.selectedTour.id)">Löschen</button>
+      </div>
+    </div>
+
+    <ng-container [ngSwitch]="vm.editorMode">
+      <ng-container *ngSwitchCase="'view'">
+        <app-ui-card *ngIf="vm.selectedTour as selectedTour; else nothingSelected">
+          <div class="details-grid">
+            <section>
+              <h3>Allgemein</h3>
+              <dl>
+                <dt>Route</dt>
+                <dd>{{ selectedTour.fromLocation }} → {{ selectedTour.toLocation }}</dd>
+                <dt>Transport</dt>
+                <dd>{{ selectedTour.transportType }}</dd>
+                <dt>Distanz</dt>
+                <dd>{{ selectedTour.distanceKm | number:'1.0-1' }} km</dd>
+                <dt>Zeit</dt>
+                <dd>{{ selectedTour.estimatedTimeMinutes }} min</dd>
+              </dl>
+            </section>
+            <section>
+              <h3>Beschreibung</h3>
+              <p>{{ selectedTour.description }}</p>
+              <div class="media-grid">
+                <div class="map-placeholder">
+                  <p>Map Placeholder</p>
+                  <small>Aktuelle Route: {{ selectedTour.routeInformation || 'n/a' }}</small>
+                </div>
+                <div class="image-column">
+                  <figure
+                    class="image-preview"
+                    [class.image-preview--empty]="!currentImagePath || imageLoadFailed">
+                    <img
+                      *ngIf="currentImagePath && !imageLoadFailed"
+                      class="image-preview__img"
+                      [src]="currentImagePath"
+                      alt="Tourbild"
+                      (error)="onImageError()"
+                      (load)="onImageLoad()" />
+                    <figcaption *ngIf="!currentImagePath || imageLoadFailed">
+                      Kein Bild hinterlegt. Bildpfad: <span>{{ currentImagePath || 'n/a' }}</span>
+                    </figcaption>
+                  </figure>
+                </div>
+              </div>
+            </section>
+          </div>
+        </app-ui-card>
+      </ng-container>
+
+      <ng-template #nothingSelected>
+        <app-ui-card variant="muted">
+          <p>Wähle links eine Tour oder lege eine neue an.</p>
+        </app-ui-card>
+      </ng-template>
+
+      <ng-container *ngSwitchDefault>
+        <app-ui-card>
+          <form class="form-grid" [formGroup]="tourForm.form" (ngSubmit)="saveTour()">
+            <label>
+              <span>Name</span>
+              <input type="text" formControlName="name" placeholder="Alpine Trail" />
+            </label>
+            <label>
+              <span>Beschreibung</span>
+              <textarea rows="3" formControlName="description" placeholder="Kurze Beschreibung der Tour"></textarea>
+            </label>
+            <div class="form-grid__row">
+              <label>
+                <span>Start</span>
+                <input type="text" formControlName="fromLocation" />
+              </label>
+              <label>
+                <span>Ziel</span>
+                <input type="text" formControlName="toLocation" />
+              </label>
+            </div>
+            <div class="form-grid__row">
+              <label>
+                <span>Transport</span>
+                <select formControlName="transportType">
+                  <option *ngFor="let transport of tourForm.transportTypes" [value]="transport">
+                    {{ transport }}
+                  </option>
+                </select>
+              </label>
+              <label>
+                <span>Distanz (km)</span>
+                <input type="number" min="1" formControlName="distanceKm" />
+              </label>
+              <label>
+                <span>Zeit (min)</span>
+                <input type="number" min="1" formControlName="estimatedTimeMinutes" />
+              </label>
+            </div>
+            <label>
+              <span>Routeninfo</span>
+              <input type="text" formControlName="routeInformation"/>
+            </label>
+            <label>
+              <span>Bild/Kartenpfad</span>
+              <input type="text" formControlName="imagePath"/>
+            </label>
+            <div class="form-actions">
+              <button type="button" class="ghost" (click)="cancelTour()">Abbrechen</button>
+              <button type="submit" class="primary" [disabled]="tourFormDisabled()">
+                Speichern
+              </button>
+            </div>
+          </form>
+        </app-ui-card>
+      </ng-container>
+    </ng-container>
+
+    <section class="logs">
+      <header>
+        <div>
+          <p class="eyebrow">Tour Logs</p>
+          <h3>{{ vm.logs.length }} Einträge</h3>
+        </div>
+        <button type="button" class="ghost" (click)="showCreateLog()" [disabled]="!vm.selectedTour">
+          + Log hinzufügen
+        </button>
+      </header>
+
+      <div class="logs__list" *ngIf="vm.logs.length; else emptyLogs">
+        <article class="log-card" *ngFor="let log of vm.logs; trackBy: trackById">
+          <div>
+            <h4>{{ log.dateTime | date:'medium' }}</h4>
+            <p>{{ log.comment || 'Kein Kommentar' }}</p>
+          </div>
+          <ul>
+            <li>Schwierigkeit: {{ log.difficulty }}</li>
+            <li>Zeit: {{ log.totalTimeMinutes }} min</li>
+            <li>Distanz: {{ log.totalDistanceKm }} km</li>
+            <li>Rating: {{ log.rating }} / 5</li>
+          </ul>
+          <div class="log-card__actions">
+            <button type="button" class="ghost" (click)="showEditLog(log.id)">Bearbeiten</button>
+            <button type="button" class="ghost danger" (click)="removeLog(log.id)">Löschen</button>
+          </div>
+        </article>
+      </div>
+
+      <ng-template #emptyLogs>
+        <app-ui-card variant="muted">
+          <p>Keine Logs vorhanden. Füge neue Statistiken hinzu, sobald Touren absolviert wurden.</p>
+        </app-ui-card>
+      </ng-template>
+
+      <app-ui-card *ngIf="vm.logEditorVisible && vm.selectedTour">
+        <form class="form-grid" [formGroup]="tourLogForm.form" (ngSubmit)="saveLog()">
+          <div class="form-grid__row">
+            <label>
+              <span>Datum & Zeit</span>
+              <input type="datetime-local" formControlName="dateTime" />
+            </label>
+            <label>
+              <span>Schwierigkeit</span>
+              <select formControlName="difficulty">
+                <option *ngFor="let level of tourLogForm.difficultyLevels" [value]="level">
+                  {{ level }}
+                </option>
+              </select>
+            </label>
+          </div>
+          <label>
+            <span>Kommentar</span>
+            <textarea rows="3" formControlName="comment" placeholder="Eindrücke von der Tour"></textarea>
+          </label>
+          <div class="form-grid__row">
+            <label>
+              <span>Gesamtzeit (min)</span>
+              <input type="number" min="1" formControlName="totalTimeMinutes" />
+            </label>
+            <label>
+              <span>Gesamtdistanz (km)</span>
+              <input type="number" min="1" formControlName="totalDistanceKm" />
+            </label>
+            <label>
+              <span>Rating (1-5)</span>
+              <input type="number" min="1" max="5" formControlName="rating" />
+            </label>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="ghost" (click)="cancelLog()">Abbrechen</button>
+            <button type="submit" class="primary" [disabled]="logFormDisabled()">
+              Log speichern
+            </button>
+          </div>
+        </form>
+      </app-ui-card>
+    </section>
+
+    <p class="feedback" *ngIf="vm.error">{{ vm.error }}</p>
+    <p class="feedback" *ngIf="vm.loading">Lade Daten …</p>
+  </section>
+</div>
