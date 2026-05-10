@@ -29,8 +29,33 @@
   gap: 1rem;
 }
 
+.user-line {
+  margin-top: 0.35rem;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.sidebar__actions,
+.file-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
 .sidebar__header button {
   align-self: flex-start;
+}
+
+.toolbox {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.76);
+}
+
+.search-field {
+  display: grid;
 }
 
 .sidebar__list {
@@ -100,7 +125,7 @@ dd {
 .media-grid {
   margin-top: 1rem;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: minmax(260px, 1.3fr) minmax(220px, 0.7fr);
   gap: 1rem;
 }
 
@@ -110,17 +135,11 @@ dd {
   gap: 0.5rem;
 }
 
-.map-placeholder {
-  border: 2px dashed rgba(15, 23, 42, 0.2);
-  border-radius: 1rem;
-  padding: 1rem;
-  text-align: center;
-}
-
 .image-preview {
   border-radius: 1rem;
   border: 1px solid rgba(15, 23, 42, 0.12);
-  min-height: 180px;
+  min-height: 260px;
+  margin: 0;
   background-color: rgba(15, 23, 42, 0.05);
   display: flex;
   align-items: center;
@@ -152,6 +171,39 @@ dd {
   border-style: dashed;
   background-color: rgba(15, 23, 42, 0.04);
   padding: 1rem;
+}
+
+.insight-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.75rem 0 1rem;
+}
+
+.metric {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
+  border-radius: 999px;
+  padding: 0.35rem 0.7rem;
+  background: rgba(15, 23, 42, 0.06);
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.metric--accent {
+  background: rgba(37, 99, 235, 0.12);
+  color: #1d4ed8;
+  font-weight: 700;
+}
+
+.description,
+.route-info {
+  line-height: 1.6;
+}
+
+.route-info {
+  margin-top: 1rem;
 }
 
 .logs {
@@ -200,6 +252,44 @@ dd {
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
 }
 
+.route-builder {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  border-radius: 0.75rem;
+  background: rgba(15, 23, 42, 0.03);
+}
+
+.route-builder__header,
+.route-stop {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.route-builder__header {
+  justify-content: space-between;
+  font-weight: 600;
+}
+
+.route-stops {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.route-stop input {
+  flex: 1;
+  min-width: 0;
+}
+
+.route-stop__remove {
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  flex: 0 0 2.5rem;
+}
+
 label {
   display: flex;
   flex-direction: column;
@@ -226,12 +316,17 @@ select {
   color: var(--text-muted);
 }
 
+.feedback--compact {
+  font-size: 0.85rem;
+}
+
 .primary,
 .ghost {
   border: none;
   border-radius: 999px;
   padding: 0.65rem 1.25rem;
   font: inherit;
+  line-height: 1.2;
   cursor: pointer;
   transition: opacity 0.2s ease, background 0.2s ease;
 }
@@ -251,6 +346,11 @@ select {
   border: 1px solid rgba(15, 23, 42, 0.12);
 }
 
+.ghost--light {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.42);
+}
+
 .ghost.danger {
   color: #b42318;
   border-color: rgba(180, 35, 24, 0.4);
@@ -263,6 +363,53 @@ select {
   color: var(--text-muted);
 }
 
+.file-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.file-button input {
+  display: none;
+}
+
+.auth-shell {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+}
+
+.auth-card {
+  width: min(420px, calc(100vw - 4rem));
+  display: grid;
+  gap: 1.25rem;
+}
+
+.segmented {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.35rem;
+  padding: 0.35rem;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.06);
+}
+
+.segmented button {
+  border: 0;
+  border-radius: 999px;
+  padding: 0.6rem 0.9rem;
+  background: transparent;
+  cursor: pointer;
+}
+
+.segmented__item--active {
+  background: #fff !important;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+  font-weight: 700;
+}
+
 @media (max-width: 1200px) {
   .dashboard {
     grid-template-columns: 1fr;
@@ -270,5 +417,33 @@ select {
 
   .sidebar {
     position: static;
+  }
+}
+
+@media (max-width: 760px) {
+  .dashboard,
+  .auth-shell {
+    padding: 1rem;
+  }
+
+  .content__header,
+  .logs header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .content__actions,
+  .form-actions,
+  .log-card__actions {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .media-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-card {
+    width: 100%;
   }
 }

@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import java.util.List;
 
 public record TourRequest(
     @NotBlank @Size(min = 3, max = 120) String name,
@@ -14,6 +15,8 @@ public record TourRequest(
     @NotNull TransportType transportType,
     @Min(1) double distanceKm,
     @Min(1) int estimatedTimeMinutes,
+    @Size(max = 2000) String routeWaypoints,
+    @Size(max = 8) List<@Size(max = 180) String> routeStops,
     @Size(max = 500) String routeInformation,
     @Size(max = 512) String imagePath
 ) {}

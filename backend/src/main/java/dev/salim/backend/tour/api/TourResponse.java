@@ -15,9 +15,17 @@ public record TourResponse(
     TransportType transportType,
     double distanceKm,
     int estimatedTimeMinutes,
+    String routeWaypoints,
+    List<String> routeStops,
     String routeInformation,
+    String routeGeoJson,
     String imagePath,
     Instant createdAt,
     Instant updatedAt,
-    List<TourLogResponse> logs
+    List<TourLogResponse> logs,
+    int popularity,
+    String popularityLabel,
+    int childFriendlinessScore,
+    String childFriendliness,
+    String achievementBadge
 ) {}

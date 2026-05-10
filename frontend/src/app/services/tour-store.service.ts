@@ -14,6 +14,7 @@ export interface TourViewModel {
   editorMode: EditorMode;
   logEditorVisible: boolean;
   editingLogId: string | null;
+  searchTerm: string;
 }
 
 @Injectable({
@@ -29,6 +30,7 @@ export class TourStore {
   private readonly editorMode = signal<EditorMode>('view');
   private readonly logEditorVisible = signal(false);
   private readonly editingLogId = signal<string | null>(null);
+  private readonly searchTerm = signal('');
 
   readonly vm = computed<TourViewModel>(() => {
     const tours = this.tours();
@@ -41,23 +43,39 @@ export class TourStore {
       error: this.error(),
       editorMode: this.editorMode(),
       logEditorVisible: this.logEditorVisible(),
-      editingLogId: this.editingLogId()
+      editingLogId: this.editingLogId(),
+      searchTerm: this.searchTerm()
     };
   });
 
-  loadTours() {
+  loadTours(searchTerm = this.searchTerm()) {
     this.loading.set(true);
     this.error.set(null);
-    this.tourService.getTours().subscribe({
+    this.searchTerm.set(searchTerm);
+    this.tourService.getTours(searchTerm).subscribe({
       next: (tours) => {
         this.tours.set(tours);
-        if (!this.selectedTourId() && tours.length > 0) {
+        const selectedExists = tours.some((tour) => tour.id === this.selectedTourId());
+        if ((!this.selectedTourId() || !selectedExists) && tours.length > 0) {
           this.selectedTourId.set(tours[0].id);
+        } else if (tours.length === 0) {
+          this.selectedTourId.set(null);
         }
         this.loading.set(false);
       },
       error: (err) => this.handleError('Die Touren konnten nicht geladen werden.', err)
     });
+  }
+
+  clear() {
+    this.tours.set([]);
+    this.selectedTourId.set(null);
+    this.editorMode.set('view');
+    this.logEditorVisible.set(false);
+    this.editingLogId.set(null);
+    this.searchTerm.set('');
+    this.error.set(null);
+    this.loading.set(false);
   }
 
   selectTour(id: string) {
@@ -150,6 +168,7 @@ export class TourStore {
         );
         this.closeLogEditor();
         this.loading.set(false);
+        this.loadTours(this.searchTerm());
       },
       error: (err) => this.handleError('Der Tour-Log konnte nicht gespeichert werden.', err)
     });
@@ -169,9 +188,17 @@ export class TourStore {
           })
         );
         this.loading.set(false);
+        this.loadTours(this.searchTerm());
       },
       error: (err) => this.handleError('Der Tour-Log konnte nicht entfernt werden.', err)
     });
+  }
+
+  replaceTours(tours: Tour[]) {
+    this.tours.set(tours);
+    this.selectedTourId.set(tours[0]?.id ?? null);
+    this.editorMode.set('view');
+    this.logEditorVisible.set(false);
   }
 
   private handleError(message: string, error: unknown) {

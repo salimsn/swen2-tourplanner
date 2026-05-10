@@ -62,7 +62,17 @@ public class TourEntity {
     @Column(nullable = false)
     private int estimatedTimeMinutes;
 
+    @Column(length = 2000)
+    private String routeWaypoints;
+
+    @Column(length = 2000)
+    private String routeStops;
+
+    @Column(length = 4000)
     private String routeInformation;
+
+    @Column(columnDefinition = "text")
+    private String routeGeoJson;
 
     private String imagePath;
 

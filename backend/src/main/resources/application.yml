@@ -15,7 +15,7 @@ spring:
     time-zone: UTC
   docker:
     compose:
-      enabled: true
+      enabled: ${DOCKER_COMPOSE_ENABLED:false}
 
 server:
   port: ${PORT:8080}
@@ -23,3 +23,11 @@ server:
 logging:
   level:
     dev.salim.backend: DEBUG
+
+openrouteservice:
+  enabled: ${ORS_ENABLED:false}
+  api-key: ${ORS_API_KEY:}
+  base-url: ${ORS_BASE_URL:https://api.openrouteservice.org}
+
+storage:
+  image-base-directory: ${TOUR_IMAGE_BASE_DIRECTORY:./tour-images}

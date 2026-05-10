@@ -1,0 +1,7 @@
+.codex-scratch/
+backend/.m2/repository/
+backend/.env
+.env
+.env.*
+!.env.example
+!backend/.env.example
