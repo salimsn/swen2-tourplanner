@@ -16,8 +16,9 @@ Git Repository: https://github.com/salimsn/swen2-tourplanner.git
 ### Touren
 
 - Touren anzeigen, erstellen, bearbeiten und löschen
-- Attribute: Name, Beschreibung, Start, Ziel, Transporttyp, Distanz, geschätzte Zeit, Route, Karten-Geometrie und Bildpfad
-- Distanz, Zeit und Route werden über die `RouteService`-Abstraktion bestimmt
+- Attribute: Name, Beschreibung, Start, Ziel, Transporttyp, automatisch berechnete Distanz, automatisch berechnete Zeit, Route, Karten-Geometrie und Bildpfad
+- Start, Ziel und optionale Zwischenstopps werden als normale Ortsnamen eingegeben, z. B. `Stephansplatz, Vienna`
+- Distanz, Zeit und Route werden je nach Transporttyp über die `RouteService`-Abstraktion und OpenRouteService bestimmt
 - OpenRouteService ist per Konfiguration aktivierbar
 - Ohne API-Key nutzt die Anwendung einen stabilen Fallback, damit Entwicklung und Tests offline laufen
 
@@ -31,7 +32,8 @@ Git Repository: https://github.com/salimsn/swen2-tourplanner.git
 ### Tour-Logs
 
 - Logs pro Tour anzeigen, erstellen, bearbeiten und löschen
-- Logdaten: Datum/Zeit, Kommentar, Schwierigkeit, Gesamtdistanz, Gesamtzeit und Rating
+- Logdaten: Datum/Zeit, Kommentar, Schwierigkeit, Gesamtzeit und Rating
+- Die Log-Distanz wird aus der Tour übernommen und nicht manuell eingegeben
 - Mehrere Logs pro Tour
 
 ### Suche und berechnete Attribute
@@ -57,7 +59,7 @@ Git Repository: https://github.com/salimsn/swen2-tourplanner.git
 - Input-Validierung im Frontend und Backend
 - Zentrale Fehlerbehandlung über `GlobalExceptionHandler`
 - Log4j2 Logging für Auth, CRUD, Import/Export, Fehler und technische Abläufe
-- 27 Backend-Tests plus Angular-App-Tests
+- 29 Backend-Tests plus Angular-App-Tests
 
 ## Demo-Login
 
@@ -82,7 +84,7 @@ tour-planner
 
 ## Konfiguration
 
-Backend-Konfiguration liegt in `backend/src/main/resources/application.yml` und kann über `.env` überschrieben werden.
+Backend-Konfiguration liegt in `backend/src/main/resources/application.yml` und kann über `.env` überschrieben werden. Die lokale `.env` ist in `.gitignore` ausgeschlossen; nur `.env.example` ist als sichere Vorlage für Git gedacht.
 
 Wichtige Variablen:
 
@@ -197,7 +199,7 @@ npm test
 Verifizierter Stand:
 
 ```text
-Backend: 27 Tests, 0 Failures
+Backend: 29 Tests, 0 Failures
 Frontend: 2 Tests, 0 Failures
 Angular build: erfolgreich
 ```

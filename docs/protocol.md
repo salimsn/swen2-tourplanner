@@ -6,7 +6,7 @@ Git Repository: https://github.com/salimsn/swen2-tourplanner.git
 
 Tour Planner ist eine zweischichtige Webanwendung mit Angular im Frontend und Spring Boot im Backend. Benutzer können sich registrieren, einloggen, eigene Touren planen, Logs für absolvierte Touren erfassen, Tourdaten durchsuchen, importieren und exportieren.
 
-Die finale Iteration ergänzt gegenüber der Zwischenabgabe die fehlende Business-Logik: Benutzertrennung, OpenRouteService-Anbindung, Leaflet-Karte, Volltextsuche, berechnete Attribute, JSON-Import/Export, Unique Feature und mehr als 20 Unit Tests.
+Die finale Iteration ergänzt gegenüber der Zwischenabgabe die fehlende Business-Logik: Benutzertrennung, OpenRouteService-Anbindung, Leaflet-Karte, benutzerfreundliche Routenerstellung über Ortsnamen, automatische Distanz- und Zeitberechnung je Transporttyp, Volltextsuche, berechnete Attribute, JSON-Import/Export, Unique Feature und mehr als 20 Unit Tests.
 
 ## 2. Technische Entscheidungen
 
@@ -19,7 +19,7 @@ Die finale Iteration ergänzt gegenüber der Zwischenabgabe die fehlende Busines
 | Tests | JUnit/Spring Boot Test | Kritische Business- und Persistenzflüsse werden gegen H2 getestet |
 | Logging | Log4j2 | Zentraler technischer Log-Stack für Services und Fehlerbehandlung |
 | Karten | Leaflet + GeoJSON | Standardlösung für Webkarten; Routen werden als GeoJSON angezeigt |
-| Routen | `RouteService` + OpenRouteService | API-Anbindung ist austauschbar und testbar |
+| Routen | `RouteService` + OpenRouteService | API-Anbindung ist austauschbar und testbar; Distanz und Zeit werden nicht manuell gepflegt |
 | Import/Export | JSON | Einfach versionierbar, lesbar und ohne Zusatzbibliotheken nutzbar |
 
 ## 3. Architektur
@@ -178,13 +178,13 @@ Bei kleinen Viewports wird die Sidebar oberhalb des Content-Bereichs gestapelt. 
 
 ## 8. OpenRouteService und Leaflet
 
-`OpenRouteServiceRouteService` verwendet die ORS-Geocoding- und Directions-API, wenn `ORS_ENABLED=true` und `ORS_API_KEY` gesetzt sind. In Tests und lokaler Entwicklung ohne Key greift ein Fallback, damit die Anwendung lauffähig bleibt und keine externen Requests benötigt.
+`OpenRouteServiceRouteService` verwendet die ORS-Geocoding- und Directions-API, wenn `ORS_ENABLED=true` und `ORS_API_KEY` gesetzt sind. Start, Ziel und optionale Zwischenstopps werden als Ortsnamen eingegeben und vor der Directions-Abfrage geocodiert. Die API liefert anschließend Distanz, Dauer und Routengeometrie passend zum Transportprofil. In Tests und lokaler Entwicklung ohne Key greift ein Fallback, damit die Anwendung lauffähig bleibt und keine externen Requests benötigt.
 
-Das Frontend rendert `routeGeoJson` mit Leaflet. Die Karte ist nicht nur ein Platzhalter: Sie initialisiert eine Leaflet-Map, lädt OpenStreetMap-Tiles und zeichnet die Route als GeoJSON-Linie.
+Das Frontend rendert `routeGeoJson` mit Leaflet. Die Karte ist nicht nur ein Platzhalter: Sie initialisiert eine Leaflet-Map, lädt OpenStreetMap-Tiles und zeichnet die echte Route als GeoJSON-Linie statt nur eine Luftlinie.
 
 ## 9. Berechnete Attribute und Unique Feature
 
-Popularity wird aus der Anzahl der Logs abgeleitet. Child-Friendliness berücksichtigt geplante Distanz, geschätzte Zeit und die gemeldeten Schwierigkeiten, Zeiten und Distanzen in Logs.
+Popularity wird aus der Anzahl der Logs abgeleitet. Child-Friendliness berücksichtigt geplante Distanz, geschätzte Zeit und die gemeldeten Schwierigkeiten und Zeiten in Logs. Die Distanz eines Logs wird aus der zugehörigen Tour übernommen, damit keine widersprüchlichen Distanzen entstehen.
 
 Unique Feature: automatische Achievement Badges. Beispiele:
 
@@ -198,7 +198,7 @@ Diese Badges werden im Detailbereich angezeigt und sind auch Teil der Volltextsu
 
 ## 10. Unit-Test-Entscheidungen
 
-Es wurden 27 Backend-Tests umgesetzt. Die Tests decken kritische Bereiche ab:
+Es wurden 29 Backend-Tests umgesetzt. Die Tests decken kritische Bereiche ab:
 
 - Auth: Registrierung, Login, Duplikate, falsches Passwort
 - Owner-Isolation: fremde Touren sind nicht sichtbar oder änderbar
@@ -222,6 +222,8 @@ Frontend-Tests prüfen den Angular-Shell-Start. Zusätzlich wurde der Angular-Pr
 | Suche musste computed Werte berücksichtigen | `TourInsightService.searchableText()` kombiniert Tour, Logs und Insights |
 | Leaflet sollte ohne Angular-Package-Installation funktionieren | Leaflet wird im `index.html` geladen und in `RouteMapComponent` gekapselt |
 | Bilder sollen nicht als Blob in DB landen | DB speichert nur `imagePath`, Basisverzeichnis liegt in Konfiguration |
+| Distanz und Zeit sollten nicht manuell eingegeben werden | `RouteService` berechnet beides beim Speichern aus Start, Ziel, Stopps und Transporttyp |
+| API-Key darf nicht auf GitHub landen | `.env` ist ignoriert, `.env.example` enthält nur Platzhalter |
 
 ## 12. Zeittracking
 
@@ -230,19 +232,20 @@ Frontend-Tests prüfen den Angular-Shell-Start. Zusätzlich wurde der Angular-Pr
 | Analyse Spezifikation und Checkliste | 1.0 h |
 | Backend Auth und Owner-Isolation | 2.0 h |
 | ORS/RouteService und Leaflet-Integration | 2.0 h |
+| Benutzerfreundliche Routenerstellung und automatische Distanz/Zeit | 1.0 h |
 | Suche, computed Attributes, Unique Feature | 2.0 h |
 | Import/Export | 1.0 h |
 | Frontend Login, Dashboard, Suche, Import/Export | 2.5 h |
 | Unit Tests und Debugging | 2.5 h |
 | Dokumentation, UML, Wireframes | 1.5 h |
-| Gesamt | 14.5 h |
+| Gesamt | 15.5 h |
 
 ## 13. Verifikation
 
 Backend:
 
 ```text
-Tests run: 27, Failures: 0, Errors: 0, Skipped: 0
+Tests run: 29, Failures: 0, Errors: 0, Skipped: 0
 ```
 
 Frontend:

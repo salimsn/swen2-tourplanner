@@ -90,12 +90,7 @@ public class OpenRouteServiceRouteService implements RouteService {
         double distanceKm = Math.round(summary.path("distance").asDouble(fallbackDistanceKm * 1000) / 100.0) / 10.0;
         int estimatedMinutes = Math.max(1, (int) Math.round(summary.path("duration").asDouble(fallbackMinutes * 60.0) / 60.0));
         String routeGeoJson = feature.path("geometry").toString();
-        String via = routeStops.isEmpty()
-            ? (waypoints.isEmpty() ? "" : " via " + waypoints.size() + " waypoints")
-            : " via " + String.join(", ", routeStops);
-        String routeInformation = "OpenRouteService " + profile + ": "
-            + request.fromLocation() + " -> " + request.toLocation()
-            + via;
+        String routeInformation = routeInformation(request, waypoints, routeStops);
         return new RouteResult(distanceKm, estimatedMinutes, routeInformation, routeGeoJson);
     }
 
@@ -127,9 +122,37 @@ public class OpenRouteServiceRouteService implements RouteService {
         };
     }
 
+    private String routeInformation(TourRequest request, List<double[]> waypoints, List<String> routeStops) {
+        String via = routeStops.isEmpty()
+            ? waypointSummary(waypoints)
+            : " über " + String.join(", ", routeStops);
+        return transportLabel(request.transportType())
+            + " von " + request.fromLocation()
+            + " nach " + request.toLocation()
+            + via;
+    }
+
+    private String waypointSummary(List<double[]> waypoints) {
+        if (waypoints.isEmpty()) {
+            return "";
+        }
+        return " mit " + waypoints.size() + (waypoints.size() == 1 ? " Wegpunkt" : " Wegpunkten");
+    }
+
+    private String transportLabel(TransportType transportType) {
+        return switch (transportType) {
+            case BIKE -> "Fahrradroute";
+            case HIKE -> "Wanderroute";
+            case RUNNING -> "Laufroute";
+            case CAR -> "Autoroute";
+            case TRAIN -> "Bahnroute";
+            case PLANE -> "Flugroute";
+        };
+    }
+
     private RouteResult fallback(TourRequest request) {
         String routeInformation = request.routeInformation() == null || request.routeInformation().isBlank()
-            ? "Manual route: " + request.fromLocation() + " -> " + request.toLocation() + fallbackStops(request)
+            ? routeInformation(request, List.of(), normalizedRouteStops(request.routeStops()))
             : request.routeInformation();
         String manualRoute = manualGeoJson(request.routeWaypoints());
         double distanceKm = fallbackDistanceKm(request);
@@ -139,11 +162,6 @@ public class OpenRouteServiceRouteService implements RouteService {
             routeInformation,
             manualRoute == null ? fallbackGeoJson() : manualRoute
         );
-    }
-
-    private String fallbackStops(TourRequest request) {
-        List<String> stops = normalizedRouteStops(request.routeStops());
-        return stops.isEmpty() ? "" : " via " + String.join(", ", stops);
     }
 
     private String fallbackGeoJson() {

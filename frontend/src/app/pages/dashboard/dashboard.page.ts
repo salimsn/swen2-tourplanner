@@ -10,6 +10,8 @@ import { AuthService } from '../../services/auth.service';
 import { AuthSessionService } from '../../services/auth-session.service';
 import { TourService } from '../../services/tour.service';
 import { RouteMapComponent } from '../../shared/route-map/route-map.component';
+import { Tour } from '../../models/tour.model';
+import { TransportType } from '../../models/transport-type.enum';
 
 @Component({
   selector: 'app-dashboard-page',
@@ -195,6 +197,68 @@ export class DashboardPage implements OnInit {
 
   removeTour(id: string) {
     this.store.deleteTour(id);
+  }
+
+  routeInformationText(tour: Tour) {
+    const info = tour.routeInformation?.trim();
+    if (!info) {
+      return this.routeSummary(tour);
+    }
+
+    const orsMatch = info.match(/^OpenRouteService\s+([a-z-]+):\s+(.+?)\s+->\s+(.+?)(?:\s+via\s+(.+))?$/);
+    if (orsMatch) {
+      const [, profile, from, to, via] = orsMatch;
+      return this.routeSummary(tour, from, to, via, this.transportLabelFromProfile(profile, tour.transportType));
+    }
+
+    const manualMatch = info.match(/^Manual route:\s+(.+?)\s+->\s+(.+?)(?:\s+via\s+(.+))?$/);
+    if (manualMatch) {
+      const [, from, to, via] = manualMatch;
+      return this.routeSummary(tour, from, to, via);
+    }
+
+    return info;
+  }
+
+  private routeSummary(
+    tour: Tour,
+    from = tour.fromLocation,
+    to = tour.toLocation,
+    via = tour.routeStops.join(', '),
+    label = this.transportLabel(tour.transportType)
+  ) {
+    const stops = via?.trim();
+    return `${label} von ${from} nach ${to}${stops ? ` über ${stops}` : ''}`;
+  }
+
+  private transportLabel(transportType: TransportType) {
+    switch (transportType) {
+      case 'BIKE':
+        return 'Fahrradroute';
+      case 'HIKE':
+        return 'Wanderroute';
+      case 'RUNNING':
+        return 'Laufroute';
+      case 'CAR':
+        return 'Autoroute';
+      case 'TRAIN':
+        return 'Bahnroute';
+      case 'PLANE':
+        return 'Flugroute';
+    }
+  }
+
+  private transportLabelFromProfile(profile: string, fallback: TransportType) {
+    switch (profile) {
+      case 'cycling-regular':
+        return 'Fahrradroute';
+      case 'foot-walking':
+        return fallback === 'RUNNING' ? 'Laufroute' : 'Wanderroute';
+      case 'driving-car':
+        return this.transportLabel(fallback);
+      default:
+        return this.transportLabel(fallback);
+    }
   }
 
   showCreateLog() {
