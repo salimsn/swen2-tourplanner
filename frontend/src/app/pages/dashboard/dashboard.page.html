@@ -139,7 +139,7 @@
           <app-ui-card>
             <form class="form-grid" [formGroup]="tourForm.form" (ngSubmit)="saveTour()">
               <label>
-                <span>Name</span>
+                <span>Name *</span>
                 <input type="text" formControlName="name" placeholder="Alpine Trail" />
               </label>
               <label>
@@ -148,30 +148,22 @@
               </label>
               <div class="form-grid__row">
                 <label>
-                  <span>Start</span>
+                  <span>Start *</span>
                   <input type="text" formControlName="fromLocation" />
                 </label>
                 <label>
-                  <span>Ziel</span>
+                  <span>Ziel *</span>
                   <input type="text" formControlName="toLocation" />
                 </label>
               </div>
               <div class="form-grid__row">
                 <label>
-                  <span>Transport</span>
+                  <span>Transport *</span>
                   <select formControlName="transportType">
                     <option *ngFor="let transport of tourForm.transportTypes" [value]="transport">
                       {{ transport }}
                     </option>
                   </select>
-                </label>
-                <label>
-                  <span>Distanz (km)</span>
-                  <input type="number" min="1" formControlName="distanceKm" />
-                </label>
-                <label>
-                  <span>Zeit (min)</span>
-                  <input type="number" min="1" formControlName="estimatedTimeMinutes" />
                 </label>
               </div>
               <label>
@@ -234,7 +226,6 @@
             <ul>
               <li>Schwierigkeit: {{ log.difficulty }}</li>
               <li>Zeit: {{ log.totalTimeMinutes }} min</li>
-              <li>Distanz: {{ log.totalDistanceKm }} km</li>
               <li>Rating: {{ log.rating }} / 5</li>
             </ul>
             <div class="log-card__actions">
@@ -274,10 +265,6 @@
               <label>
                 <span>Gesamtzeit (min)</span>
                 <input type="number" min="1" formControlName="totalTimeMinutes" />
-              </label>
-              <label>
-                <span>Gesamtdistanz (km)</span>
-                <input type="number" min="1" formControlName="totalDistanceKm" />
               </label>
               <label>
                 <span>Rating (1-5)</span>

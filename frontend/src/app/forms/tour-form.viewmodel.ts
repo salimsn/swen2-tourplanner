@@ -10,12 +10,10 @@ export class TourFormViewModel {
 
   readonly form = this.fb.nonNullable.group({
     name: ['', [Validators.required, Validators.minLength(3)]],
-    description: ['', [Validators.required, Validators.maxLength(1500)]],
+    description: ['', [Validators.maxLength(1500)]],
     fromLocation: ['', Validators.required],
     toLocation: ['', Validators.required],
     transportType: this.fb.nonNullable.control<TransportType>('BIKE', Validators.required),
-    distanceKm: [5, [Validators.required, Validators.min(1)]],
-    estimatedTimeMinutes: [60, [Validators.required, Validators.min(1)]],
     routeWaypoints: [''],
     routeStops: this.fb.array<FormControl<string>>([]),
     routeInformation: [''],
@@ -46,8 +44,6 @@ export class TourFormViewModel {
       fromLocation: tour.fromLocation,
       toLocation: tour.toLocation,
       transportType: tour.transportType,
-      distanceKm: tour.distanceKm,
-      estimatedTimeMinutes: tour.estimatedTimeMinutes,
       routeWaypoints: tour.routeWaypoints ?? '',
       routeInformation: tour.routeInformation ?? '',
       imagePath: tour.imagePath ?? ''
@@ -63,8 +59,6 @@ export class TourFormViewModel {
       fromLocation: '',
       toLocation: '',
       transportType: 'BIKE',
-      distanceKm: 5,
-      estimatedTimeMinutes: 60,
       routeWaypoints: '',
       routeStops: [],
       routeInformation: '',

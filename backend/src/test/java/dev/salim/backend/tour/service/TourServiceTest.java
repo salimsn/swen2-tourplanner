@@ -55,6 +55,26 @@ class TourServiceTest {
     }
 
     @Test
+    void createTour_calculatesDistanceAndTimeWhenRequestDoesNotContainManualValues() {
+        TourResponse response = tourService.create(OWNER, new TourRequest(
+            "Auto Calculated Tour",
+            "Distance and time come from route data",
+            "Tulln",
+            "Vienna",
+            TransportType.BIKE,
+            null,
+            null,
+            "16.0549,48.3316;16.3738,48.2082",
+            List.of(),
+            "",
+            "image.jpg"
+        ));
+
+        assertThat(response.distanceKm()).isGreaterThan(1);
+        assertThat(response.estimatedTimeMinutes()).isGreaterThan(1);
+    }
+
+    @Test
     void findAll_returnsOnlyToursForOwner() {
         tourService.create(OWNER, defaultTourRequest());
         tourService.create(OTHER_OWNER, alternateTourRequest());
@@ -99,10 +119,11 @@ class TourServiceTest {
     void createLog_addsLogToTour() {
         TourResponse created = tourService.create(OWNER, defaultTourRequest());
 
-        tourService.createLog(OWNER, created.id(), defaultLogRequest("Sunny day", Difficulty.EASY, 5));
+        TourLogResponse log = tourService.createLog(OWNER, created.id(), defaultLogRequest("Sunny day", Difficulty.EASY, 5));
 
         assertThat(logRepository.findAll()).hasSize(1);
         assertThat(tourService.findLogs(OWNER, created.id())).hasSize(1);
+        assertThat(log.totalDistanceKm()).isEqualTo(created.distanceKm());
     }
 
     @Test
@@ -191,7 +212,7 @@ class TourServiceTest {
             "Park",
             "Playground",
             TransportType.HIKE,
-            2,
+            2.0,
             30,
             "16.30,48.20;16.31,48.21",
             List.of("Small Park, Vienna"),
@@ -254,7 +275,7 @@ class TourServiceTest {
             "Krems",
             "Melk",
             TransportType.BIKE,
-            25,
+            25.0,
             120,
             "16.0549,48.3316;16.1250,48.3150;16.3738,48.2082",
             List.of("Durnstein", "Spitz"),
@@ -270,7 +291,7 @@ class TourServiceTest {
             "Vienna",
             "Graz",
             TransportType.TRAIN,
-            200,
+            200.0,
             120,
             "16.3738,48.2082;15.4395,47.0707",
             List.of("Wien Hauptbahnhof"),
@@ -284,7 +305,6 @@ class TourServiceTest {
             Instant.now(),
             comment,
             difficulty,
-            difficulty == Difficulty.EASY ? 5 : 30,
             difficulty == Difficulty.EASY ? 45 : 280,
             rating
         );

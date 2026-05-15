@@ -26,17 +26,14 @@ export interface Tour {
   achievementBadge: string;
 }
 
-export type TourPayload = Omit<
-  Tour,
-  | 'id'
-  | 'logs'
-  | 'createdAt'
-  | 'updatedAt'
-  | 'ownerId'
-  | 'routeGeoJson'
-  | 'popularity'
-  | 'popularityLabel'
-  | 'childFriendlinessScore'
-  | 'childFriendliness'
-  | 'achievementBadge'
->;
+export interface TourPayload {
+  name: string;
+  description: string;
+  fromLocation: string;
+  toLocation: string;
+  transportType: TransportType;
+  routeWaypoints: string;
+  routeStops: string[];
+  routeInformation: string;
+  imagePath: string;
+}

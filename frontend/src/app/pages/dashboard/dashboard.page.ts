@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, computed, effect, inject, signal } from '@angular/core';
+import { Component, OnInit, effect, inject, signal } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { TourStore } from '../../services/tour-store.service';
 import { UiCardComponent } from '../../shared/ui-card/ui-card.component';
@@ -34,9 +34,6 @@ export class DashboardPage implements OnInit {
   readonly importError = signal<string | null>(null);
   imageLoadFailed = false;
   currentImagePath = '';
-
-  readonly tourFormDisabled = computed(() => this.tourForm.form.invalid || this.vm().loading);
-  readonly logFormDisabled = computed(() => this.tourLogForm.form.invalid || this.vm().loading);
 
   constructor() {
     effect(() => {
@@ -177,6 +174,10 @@ export class DashboardPage implements OnInit {
     this.store.cancelTourEditor();
   }
 
+  tourFormDisabled() {
+    return this.tourForm.form.invalid || this.vm().loading;
+  }
+
   addRouteStop() {
     this.tourForm.addRouteStop();
   }
@@ -206,6 +207,10 @@ export class DashboardPage implements OnInit {
 
   cancelLog() {
     this.store.closeLogEditor();
+  }
+
+  logFormDisabled() {
+    return this.tourLogForm.form.invalid || this.vm().loading;
   }
 
   saveLog() {

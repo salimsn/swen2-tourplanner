@@ -75,11 +75,11 @@ public class TourMapper {
         entity.setImagePath(request.imagePath());
     }
 
-    public void updateLogEntity(TourLogEntity entity, TourLogRequest request) {
+    public void updateLogEntity(TourLogEntity entity, TourEntity tour, TourLogRequest request) {
         entity.setDateTime(request.dateTime());
         entity.setComment(request.comment());
         entity.setDifficulty(request.difficulty());
-        entity.setTotalDistanceKm(request.totalDistanceKm());
+        entity.setTotalDistanceKm(tour.getDistanceKm());
         entity.setTotalTimeMinutes(request.totalTimeMinutes());
         entity.setRating(request.rating());
     }
@@ -87,7 +87,7 @@ public class TourMapper {
     public TourLogEntity createLog(TourEntity tour, TourLogRequest request) {
         TourLogEntity entity = new TourLogEntity();
         entity.setTour(tour);
-        updateLogEntity(entity, request);
+        updateLogEntity(entity, tour, request);
         return entity;
     }
 

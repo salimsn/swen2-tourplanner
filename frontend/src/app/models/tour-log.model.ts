@@ -10,4 +10,10 @@ export interface TourLog {
   rating: number;
 }
 
-export type TourLogPayload = Omit<TourLog, 'id'>;
+export interface TourLogPayload {
+  dateTime: string;
+  comment: string;
+  difficulty: Difficulty;
+  totalTimeMinutes: number;
+  rating: number;
+}

@@ -11,7 +11,6 @@ public record TourLogRequest(
     @NotNull Instant dateTime,
     @Size(max = 1000) String comment,
     @NotNull Difficulty difficulty,
-    @Min(1) double totalDistanceKm,
     @Min(1) int totalTimeMinutes,
     @Min(1) @Max(5) int rating
 ) {}

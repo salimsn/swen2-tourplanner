@@ -85,8 +85,10 @@ public class OpenRouteServiceRouteService implements RouteService {
 
         JsonNode feature = response.path("features").get(0);
         JsonNode summary = feature.path("properties").path("summary");
-        double distanceKm = Math.round(summary.path("distance").asDouble(request.distanceKm() * 1000) / 100.0) / 10.0;
-        int estimatedMinutes = Math.max(1, (int) Math.round(summary.path("duration").asDouble(request.estimatedTimeMinutes() * 60) / 60.0));
+        double fallbackDistanceKm = fallbackDistanceKm(request);
+        int fallbackMinutes = fallbackEstimatedMinutes(request, fallbackDistanceKm);
+        double distanceKm = Math.round(summary.path("distance").asDouble(fallbackDistanceKm * 1000) / 100.0) / 10.0;
+        int estimatedMinutes = Math.max(1, (int) Math.round(summary.path("duration").asDouble(fallbackMinutes * 60.0) / 60.0));
         String routeGeoJson = feature.path("geometry").toString();
         String via = routeStops.isEmpty()
             ? (waypoints.isEmpty() ? "" : " via " + waypoints.size() + " waypoints")
@@ -130,9 +132,10 @@ public class OpenRouteServiceRouteService implements RouteService {
             ? "Manual route: " + request.fromLocation() + " -> " + request.toLocation() + fallbackStops(request)
             : request.routeInformation();
         String manualRoute = manualGeoJson(request.routeWaypoints());
+        double distanceKm = fallbackDistanceKm(request);
         return new RouteResult(
-            request.distanceKm(),
-            request.estimatedTimeMinutes(),
+            distanceKm,
+            fallbackEstimatedMinutes(request, distanceKm),
             routeInformation,
             manualRoute == null ? fallbackGeoJson() : manualRoute
         );
@@ -145,6 +148,58 @@ public class OpenRouteServiceRouteService implements RouteService {
 
     private String fallbackGeoJson() {
         return FALLBACK_GEOJSON.trim();
+    }
+
+    private double fallbackDistanceKm(TourRequest request) {
+        if (request.distanceKm() != null && request.distanceKm() > 0) {
+            return request.distanceKm();
+        }
+
+        List<double[]> points = parseRouteWaypointsLenient(request.routeWaypoints());
+        if (points.size() < 2) {
+            return 1;
+        }
+
+        double meters = 0;
+        for (int i = 1; i < points.size(); i++) {
+            meters += haversineMeters(points.get(i - 1), points.get(i));
+        }
+        return Math.max(1, Math.round(meters / 100.0) / 10.0);
+    }
+
+    private int fallbackEstimatedMinutes(TourRequest request, double distanceKm) {
+        if (request.estimatedTimeMinutes() != null && request.estimatedTimeMinutes() > 0) {
+            return request.estimatedTimeMinutes();
+        }
+
+        double speedKmh = switch (request.transportType()) {
+            case HIKE -> 4.5;
+            case RUNNING -> 9.0;
+            case BIKE -> 18.0;
+            case CAR -> 60.0;
+            case TRAIN -> 95.0;
+            case PLANE -> 700.0;
+        };
+        return Math.max(1, (int) Math.round(distanceKm / speedKmh * 60));
+    }
+
+    private List<double[]> parseRouteWaypointsLenient(String routeWaypoints) {
+        try {
+            return parseRouteWaypoints(routeWaypoints);
+        } catch (IllegalArgumentException ex) {
+            return List.of();
+        }
+    }
+
+    private double haversineMeters(double[] first, double[] second) {
+        double earthRadiusMeters = 6_371_000;
+        double firstLat = Math.toRadians(first[1]);
+        double secondLat = Math.toRadians(second[1]);
+        double deltaLat = Math.toRadians(second[1] - first[1]);
+        double deltaLon = Math.toRadians(second[0] - first[0]);
+        double a = Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2)
+            + Math.cos(firstLat) * Math.cos(secondLat) * Math.sin(deltaLon / 2) * Math.sin(deltaLon / 2);
+        return earthRadiusMeters * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     }
 
     private List<double[]> parseRouteWaypoints(String routeWaypoints) {

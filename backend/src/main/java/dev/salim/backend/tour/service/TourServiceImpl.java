@@ -97,10 +97,10 @@ public class TourServiceImpl implements TourService {
 
     @Override
     public TourLogResponse updateLog(UUID ownerId, UUID tourId, UUID logId, TourLogRequest request) {
-        getTourOrThrow(ownerId, tourId);
+        TourEntity tour = getTourOrThrow(ownerId, tourId);
         TourLogEntity logEntity = getLogOrThrow(logId);
         ensureBelongsToTour(tourId, logEntity);
-        mapper.updateLogEntity(logEntity, request);
+        mapper.updateLogEntity(logEntity, tour, request);
         return mapper.toLogResponse(logEntity);
     }
 

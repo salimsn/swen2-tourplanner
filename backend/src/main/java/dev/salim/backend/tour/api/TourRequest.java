@@ -1,7 +1,6 @@
 package dev.salim.backend.tour.api;
 
 import dev.salim.backend.tour.domain.TransportType;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -13,8 +12,8 @@ public record TourRequest(
     @NotBlank String fromLocation,
     @NotBlank String toLocation,
     @NotNull TransportType transportType,
-    @Min(1) double distanceKm,
-    @Min(1) int estimatedTimeMinutes,
+    Double distanceKm,
+    Integer estimatedTimeMinutes,
     @Size(max = 2000) String routeWaypoints,
     @Size(max = 8) List<@Size(max = 180) String> routeStops,
     @Size(max = 500) String routeInformation,

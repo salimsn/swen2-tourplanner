@@ -12,7 +12,6 @@ export class TourLogFormViewModel {
     dateTime: ['', Validators.required],
     comment: ['', [Validators.maxLength(1000)]],
     difficulty: this.fb.nonNullable.control<Difficulty>('MODERATE', Validators.required),
-    totalDistanceKm: [1, [Validators.required, Validators.min(1)]],
     totalTimeMinutes: [30, [Validators.required, Validators.min(1)]],
     rating: [3, [Validators.required, Validators.min(1), Validators.max(5)]]
   });
@@ -27,7 +26,6 @@ export class TourLogFormViewModel {
       dateTime: this.toDateTimeInput(log.dateTime),
       comment: log.comment ?? '',
       difficulty: log.difficulty,
-      totalDistanceKm: log.totalDistanceKm,
       totalTimeMinutes: log.totalTimeMinutes,
       rating: log.rating
     });
@@ -39,7 +37,6 @@ export class TourLogFormViewModel {
       dateTime: this.toDateTimeInput(now),
       comment: '',
       difficulty: 'MODERATE',
-      totalDistanceKm: 1,
       totalTimeMinutes: 30,
       rating: 3
     });
