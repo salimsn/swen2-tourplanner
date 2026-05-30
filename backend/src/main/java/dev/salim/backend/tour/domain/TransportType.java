@@ -4,7 +4,5 @@ public enum TransportType {
     CAR,
     BIKE,
     HIKE,
-    RUNNING,
-    TRAIN,
-    PLANE
+    RUNNING
 }

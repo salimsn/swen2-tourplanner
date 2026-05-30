@@ -43,6 +43,26 @@ class TourInsightServiceTest {
     }
 
     @Test
+    void calculate_scoresMediumCarTripsAsChildFriendly() {
+        TourEntity tour = tour(55, 55, TransportType.CAR);
+
+        TourInsights insights = service.calculate(tour);
+
+        assertThat(insights.childFriendliness()).isEqualTo("Child-friendly");
+        assertThat(insights.achievementBadge()).isEqualTo("Family drive");
+    }
+
+    @Test
+    void calculate_doesNotLabelCarTripsAsEnduranceRoutes() {
+        TourEntity tour = tour(120, 130, TransportType.CAR);
+
+        TourInsights insights = service.calculate(tour);
+
+        assertThat(insights.achievementBadge()).isNotEqualTo("Endurance route");
+        assertThat(insights.achievementBadge()).isEqualTo("Scenic drive");
+    }
+
+    @Test
     void searchableText_containsComputedBadge() {
         TourEntity tour = tour(2, 45);
         tour.getLogs().add(log(tour, Difficulty.EASY, 5));
@@ -53,12 +73,16 @@ class TourInsightServiceTest {
     }
 
     private TourEntity tour(double distanceKm, int estimatedTimeMinutes) {
+        return tour(distanceKm, estimatedTimeMinutes, TransportType.HIKE);
+    }
+
+    private TourEntity tour(double distanceKm, int estimatedTimeMinutes, TransportType transportType) {
         return TourEntity.builder()
             .name("Park Loop")
             .description("Easy")
             .fromLocation("Start")
             .toLocation("Finish")
-            .transportType(TransportType.HIKE)
+            .transportType(transportType)
             .distanceKm(distanceKm)
             .estimatedTimeMinutes(estimatedTimeMinutes)
             .routeInformation("Loop")

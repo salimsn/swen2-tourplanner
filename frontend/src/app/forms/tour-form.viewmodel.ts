@@ -70,6 +70,7 @@ export class TourFormViewModel {
     const raw = this.form.getRawValue();
     return {
       ...raw,
+      imagePath: this.normalizeImagePath(raw.imagePath),
       routeStops: raw.routeStops.map((stop) => stop.trim()).filter(Boolean)
     };
   }
@@ -80,5 +81,21 @@ export class TourFormViewModel {
       .map((stop) => stop.trim())
       .filter(Boolean)
       .forEach((stop) => this.addRouteStop(stop));
+  }
+
+  private normalizeImagePath(value: string) {
+    const imagePath = value.trim();
+    if (!imagePath) {
+      return '';
+    }
+    if (
+      imagePath.startsWith('assets/') ||
+      imagePath.startsWith('http://') ||
+      imagePath.startsWith('https://') ||
+      imagePath.startsWith('/')
+    ) {
+      return imagePath;
+    }
+    return `assets/tours/${imagePath}`;
   }
 }

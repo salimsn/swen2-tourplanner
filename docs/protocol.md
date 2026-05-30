@@ -178,13 +178,15 @@ Bei kleinen Viewports wird die Sidebar oberhalb des Content-Bereichs gestapelt. 
 
 ## 8. OpenRouteService und Leaflet
 
-`OpenRouteServiceRouteService` verwendet die ORS-Geocoding- und Directions-API, wenn `ORS_ENABLED=true` und `ORS_API_KEY` gesetzt sind. Start, Ziel und optionale Zwischenstopps werden als Ortsnamen eingegeben und vor der Directions-Abfrage geocodiert. Die API liefert anschließend Distanz, Dauer und Routengeometrie passend zum Transportprofil. In Tests und lokaler Entwicklung ohne Key greift ein Fallback, damit die Anwendung lauffähig bleibt und keine externen Requests benötigt.
+`OpenRouteServiceRouteService` verwendet die ORS-Geocoding- und Directions-API, wenn `ORS_ENABLED=true` und `ORS_API_KEY` gesetzt sind. Start, Ziel und optionale Zwischenstopps werden als Ortsnamen eingegeben und vor der Directions-Abfrage geocodiert. Die API liefert anschließend Distanz, Dauer und Routengeometrie passend zum Transportprofil. Unterstützt werden nur Transportarten, die sauber auf ORS-Profile abbildbar sind: `CAR` auf `driving-car`, `BIKE` auf `cycling-regular` und `HIKE`/`RUNNING` auf `foot-walking`. In Tests und lokaler Entwicklung ohne Key greift ein Fallback, damit die Anwendung lauffähig bleibt und keine externen Requests benötigt.
 
 Das Frontend rendert `routeGeoJson` mit Leaflet. Die Karte ist nicht nur ein Platzhalter: Sie initialisiert eine Leaflet-Map, lädt OpenStreetMap-Tiles und zeichnet die echte Route als GeoJSON-Linie statt nur eine Luftlinie.
 
 ## 9. Berechnete Attribute und Unique Feature
 
-Popularity wird aus der Anzahl der Logs abgeleitet. Child-Friendliness berücksichtigt geplante Distanz, geschätzte Zeit und die gemeldeten Schwierigkeiten und Zeiten in Logs. Die Distanz eines Logs wird aus der zugehörigen Tour übernommen, damit keine widersprüchlichen Distanzen entstehen.
+Popularity wird aus der Anzahl der Logs abgeleitet. Child-Friendliness berücksichtigt geplante Distanz, geschätzte Zeit, Transporttyp und die gemeldeten Schwierigkeiten und Zeiten in Logs. Die Distanz eines Logs wird aus der zugehörigen Tour übernommen, damit keine widersprüchlichen Distanzen entstehen.
+
+Die Bewertung ist transportabhängig: Bei `BIKE`, `HIKE` und `RUNNING` wirkt sich Distanz stärker aus, weil sie körperlich relevant ist. Bei `CAR` zählt die Fahrzeit stärker als die Distanz, damit eine normale Autostrecke nicht fälschlich wie eine sportliche Ausdauerroute bewertet wird.
 
 Unique Feature: automatische Achievement Badges. Beispiele:
 
@@ -193,12 +195,16 @@ Unique Feature: automatische Achievement Badges. Beispiele:
 - `Quick win`
 - `Family pick`
 - `Explorer`
+- `Family drive`
+- `Comfort pick`
+- `Road trip`
+- `Scenic drive`
 
 Diese Badges werden im Detailbereich angezeigt und sind auch Teil der Volltextsuche.
 
 ## 10. Unit-Test-Entscheidungen
 
-Es wurden 29 Backend-Tests umgesetzt. Die Tests decken kritische Bereiche ab:
+Es wurden 31 Backend-Tests umgesetzt. Die Tests decken kritische Bereiche ab:
 
 - Auth: Registrierung, Login, Duplikate, falsches Passwort
 - Owner-Isolation: fremde Touren sind nicht sichtbar oder änderbar
@@ -207,6 +213,7 @@ Es wurden 29 Backend-Tests umgesetzt. Die Tests decken kritische Bereiche ab:
 - Volltextsuche über Tourdaten, Logdaten und computed Werte
 - Import/Export inklusive Logs und Owner-Zuordnung
 - Berechnung von Popularity, Child-Friendliness und Badges
+- Transportabhängige Child-Friendliness- und Badge-Bewertung für Autotouren
 - Application Context Smoke Test
 
 Diese Bereiche sind kritisch, weil Fehler hier direkt zu Datenverlust, Datenschutzproblemen, falscher Bewertung oder nicht erfüllten Must-Haves führen würden.
@@ -224,6 +231,8 @@ Frontend-Tests prüfen den Angular-Shell-Start. Zusätzlich wurde der Angular-Pr
 | Bilder sollen nicht als Blob in DB landen | DB speichert nur `imagePath`, Basisverzeichnis liegt in Konfiguration |
 | Distanz und Zeit sollten nicht manuell eingegeben werden | `RouteService` berechnet beides beim Speichern aus Start, Ziel, Stopps und Transporttyp |
 | API-Key darf nicht auf GitHub landen | `.env` ist ignoriert, `.env.example` enthält nur Platzhalter |
+| Zug und Flugzeug sind keine stabilen ORS-Directions-Profile | `TRAIN` und `PLANE` wurden entfernt; unterstützt werden `CAR`, `BIKE`, `HIKE`, `RUNNING` |
+| Autostrecken wurden wie sportliche Ausdauerrouten bewertet | `TourInsightService` verwendet eigene Distanz-/Zeit-Abzüge und eigene Badges für `CAR` |
 
 ## 12. Zeittracking
 
@@ -234,18 +243,19 @@ Frontend-Tests prüfen den Angular-Shell-Start. Zusätzlich wurde der Angular-Pr
 | ORS/RouteService und Leaflet-Integration | 2.0 h |
 | Benutzerfreundliche Routenerstellung und automatische Distanz/Zeit | 1.0 h |
 | Suche, computed Attributes, Unique Feature | 2.0 h |
+| Transportbereinigung und Auto-spezifische Insights | 0.5 h |
 | Import/Export | 1.0 h |
 | Frontend Login, Dashboard, Suche, Import/Export | 2.5 h |
 | Unit Tests und Debugging | 2.5 h |
 | Dokumentation, UML, Wireframes | 1.5 h |
-| Gesamt | 15.5 h |
+| Gesamt | 16.0 h |
 
 ## 13. Verifikation
 
 Backend:
 
 ```text
-Tests run: 29, Failures: 0, Errors: 0, Skipped: 0
+Tests run: 31, Failures: 0, Errors: 0, Skipped: 0
 ```
 
 Frontend:

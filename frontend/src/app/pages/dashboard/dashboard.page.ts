@@ -241,10 +241,6 @@ export class DashboardPage implements OnInit {
         return 'Laufroute';
       case 'CAR':
         return 'Autoroute';
-      case 'TRAIN':
-        return 'Bahnroute';
-      case 'PLANE':
-        return 'Flugroute';
     }
   }
 

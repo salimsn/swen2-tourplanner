@@ -25,7 +25,8 @@ public class DatabaseSchemaCompatibilityInitializer implements ApplicationRunner
         try {
             jdbcTemplate.execute("alter table if exists tours add column if not exists route_stops varchar(2000)");
             jdbcTemplate.execute("alter table if exists tours alter column route_geo_json type text");
-            log.info("Ensured route stop and OpenRouteService geometry columns are compatible");
+            jdbcTemplate.execute("update tours set transport_type = 'CAR' where transport_type in ('TRAIN', 'PLANE')");
+            log.info("Ensured route stop, transport type and OpenRouteService geometry columns are compatible");
         } catch (DataAccessException ex) {
             log.warn("Could not adjust tours.route_geo_json column: {}", ex.getMostSpecificCause().getMessage());
         }

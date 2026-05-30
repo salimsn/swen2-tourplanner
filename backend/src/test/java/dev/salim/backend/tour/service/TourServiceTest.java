@@ -100,7 +100,7 @@ class TourServiceTest {
         TourResponse updated = tourService.update(OWNER, created.id(), alternateTourRequest());
 
         assertThat(updated.name()).isEqualTo("Updated Ride");
-        assertThat(updated.transportType()).isEqualTo(TransportType.TRAIN);
+        assertThat(updated.transportType()).isEqualTo(TransportType.CAR);
         assertThat(updated.routeInformation()).isEqualTo("updated route");
     }
 
@@ -290,7 +290,7 @@ class TourServiceTest {
             "Updated description",
             "Vienna",
             "Graz",
-            TransportType.TRAIN,
+            TransportType.CAR,
             200.0,
             120,
             "16.3738,48.2082;15.4395,47.0707",

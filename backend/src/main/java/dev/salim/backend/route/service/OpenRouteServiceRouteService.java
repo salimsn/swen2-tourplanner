@@ -118,7 +118,7 @@ public class OpenRouteServiceRouteService implements RouteService {
         return switch (transportType) {
             case BIKE -> "cycling-regular";
             case HIKE, RUNNING -> "foot-walking";
-            case CAR, TRAIN, PLANE -> "driving-car";
+            case CAR -> "driving-car";
         };
     }
 
@@ -145,8 +145,6 @@ public class OpenRouteServiceRouteService implements RouteService {
             case HIKE -> "Wanderroute";
             case RUNNING -> "Laufroute";
             case CAR -> "Autoroute";
-            case TRAIN -> "Bahnroute";
-            case PLANE -> "Flugroute";
         };
     }
 
@@ -195,8 +193,6 @@ public class OpenRouteServiceRouteService implements RouteService {
             case RUNNING -> 9.0;
             case BIKE -> 18.0;
             case CAR -> 60.0;
-            case TRAIN -> 95.0;
-            case PLANE -> 700.0;
         };
         return Math.max(1, (int) Math.round(distanceKm / speedKmh * 60));
     }

@@ -1,6 +1,6 @@
 # Tour Planner
 
-Tour Planner ist eine Webanwendung zum Planen, Verwalten und Auswerten von Bike-, Hike-, Running- und Vacation-Touren. Das Projekt besteht aus einem Angular-Frontend und einem Spring-Boot-Backend mit REST-API, JPA/Hibernate, PostgreSQL und Log4j2.
+Tour Planner ist eine Webanwendung zum Planen, Verwalten und Auswerten von Auto-, Bike-, Hike- und Running-Touren. Das Projekt besteht aus einem Angular-Frontend und einem Spring-Boot-Backend mit REST-API, JPA/Hibernate, PostgreSQL und Log4j2.
 
 Git Repository: https://github.com/salimsn/swen2-tourplanner.git
 
@@ -19,6 +19,7 @@ Git Repository: https://github.com/salimsn/swen2-tourplanner.git
 - Attribute: Name, Beschreibung, Start, Ziel, Transporttyp, automatisch berechnete Distanz, automatisch berechnete Zeit, Route, Karten-Geometrie und Bildpfad
 - Start, Ziel und optionale Zwischenstopps werden als normale Ortsnamen eingegeben, z. B. `Stephansplatz, Vienna`
 - Distanz, Zeit und Route werden je nach Transporttyp über die `RouteService`-Abstraktion und OpenRouteService bestimmt
+- Unterstützte Transporttypen: `CAR`, `BIKE`, `HIKE`, `RUNNING`
 - OpenRouteService ist per Konfiguration aktivierbar
 - Ohne API-Key nutzt die Anwendung einen stabilen Fallback, damit Entwicklung und Tests offline laufen
 
@@ -41,8 +42,8 @@ Git Repository: https://github.com/salimsn/swen2-tourplanner.git
 - Volltextsuche über Tourdaten, Tour-Logs und berechnete Werte
 - Berechnete Attribute:
   - Popularity aus Anzahl der Logs
-  - Child-Friendliness aus Distanz, Dauer und Log-Schwierigkeiten
-  - Achievement Badge als Unique Feature
+  - Child-Friendliness aus Distanz, Dauer, Transporttyp und Log-Schwierigkeiten
+  - Transportabhängige Achievement Badges als Unique Feature, z. B. eigene Auto-Badges wie `Family drive`
 - Suchbegriffe wie `popular`, `child-friendly`, Log-Kommentare oder Routenorte werden berücksichtigt
 
 ### Import und Export
@@ -59,7 +60,7 @@ Git Repository: https://github.com/salimsn/swen2-tourplanner.git
 - Input-Validierung im Frontend und Backend
 - Zentrale Fehlerbehandlung über `GlobalExceptionHandler`
 - Log4j2 Logging für Auth, CRUD, Import/Export, Fehler und technische Abläufe
-- 29 Backend-Tests plus Angular-App-Tests
+- 31 Backend-Tests plus Angular-App-Tests
 
 ## Demo-Login
 
@@ -199,7 +200,7 @@ npm test
 Verifizierter Stand:
 
 ```text
-Backend: 29 Tests, 0 Failures
+Backend: 31 Tests, 0 Failures
 Frontend: 2 Tests, 0 Failures
 Angular build: erfolgreich
 ```

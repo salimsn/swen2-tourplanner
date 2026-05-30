@@ -3,6 +3,7 @@ package dev.salim.backend.tour.service;
 import dev.salim.backend.tour.domain.Difficulty;
 import dev.salim.backend.tour.domain.TourEntity;
 import dev.salim.backend.tour.domain.TourLogEntity;
+import dev.salim.backend.tour.domain.TransportType;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -49,14 +50,30 @@ public class TourInsightService {
     }
 
     private int childFriendlinessScore(TourEntity tour) {
-        double distancePenalty = Math.min(35, tour.getDistanceKm() * 1.2);
-        double timePenalty = Math.min(30, tour.getEstimatedTimeMinutes() / 20.0);
+        double distancePenalty = distancePenalty(tour);
+        double timePenalty = timePenalty(tour);
         double difficultyPenalty = tour.getLogs().stream()
             .mapToInt(this::difficultyPenalty)
             .average()
             .orElse(8);
         int score = (int) Math.round(100 - distancePenalty - timePenalty - difficultyPenalty);
         return Math.max(0, Math.min(100, score));
+    }
+
+    private double distancePenalty(TourEntity tour) {
+        return switch (tour.getTransportType()) {
+            case CAR -> Math.min(15, tour.getDistanceKm() * 0.12);
+            case BIKE -> Math.min(35, tour.getDistanceKm() * 1.2);
+            case HIKE, RUNNING -> Math.min(40, tour.getDistanceKm() * 2.0);
+        };
+    }
+
+    private double timePenalty(TourEntity tour) {
+        return switch (tour.getTransportType()) {
+            case CAR -> Math.min(35, tour.getEstimatedTimeMinutes() / 12.0);
+            case BIKE -> Math.min(30, tour.getEstimatedTimeMinutes() / 20.0);
+            case HIKE, RUNNING -> Math.min(35, tour.getEstimatedTimeMinutes() / 15.0);
+        };
     }
 
     private int difficultyPenalty(TourLogEntity log) {
@@ -105,6 +122,9 @@ public class TourInsightService {
         if (logCount >= 5 && averageRating >= 4.5) {
             return "Community favorite";
         }
+        if (tour.getTransportType() == TransportType.CAR) {
+            return carBadge(tour, averageRating);
+        }
         if (tour.getDistanceKm() >= 50) {
             return "Endurance route";
         }
@@ -115,6 +135,19 @@ public class TourInsightService {
             return "Family pick";
         }
         return "Explorer";
+    }
+
+    private String carBadge(TourEntity tour, double averageRating) {
+        if (tour.getEstimatedTimeMinutes() <= 90 && childFriendlinessScore(tour) >= 75) {
+            return "Family drive";
+        }
+        if (averageRating >= 4) {
+            return "Comfort pick";
+        }
+        if (tour.getEstimatedTimeMinutes() >= 180) {
+            return "Road trip";
+        }
+        return "Scenic drive";
     }
 
     private void append(StringBuilder builder, String value) {
